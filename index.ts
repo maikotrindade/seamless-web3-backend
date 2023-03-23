@@ -1,9 +1,8 @@
 #!/usr/bin/env ts-node
-
 /* eslint-disable import/first */
 require('dotenv').config();
 
-const { Network, Alchemy } = require("alchemy-sdk");
+const { Network, Alchemy, Utils } = require("alchemy-sdk");
 
 const settings = {
     apiKey: process.env.ALCHEMY_KEY,
@@ -12,10 +11,13 @@ const settings = {
 
 const alchemy = new Alchemy(settings);
 
-// Get the latest block
-const latestBlock = alchemy.core.getBlockNumber();
+const getBalance = async () => { 
+  try {
+  const balance = await alchemy.core.getBalance("0xAA65C14ADDDc3B408a41d76E6E24365Fa32DE6e8", 'latest')
+  console.log(`Balance is ${Utils.formatEther(balance)}: ETH`);
+  } catch(err) {
+    console.log(err);
+  }
+}  
 
-// Get all outbound transfers for a provided address
-alchemy.core
-    .getTokenBalances('0x994b342dd87fc825f66e51ffa3ef71ad818b6893')
-    .then(console.log);
+getBalance() 
