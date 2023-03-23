@@ -9,6 +9,8 @@
   "author": "@maikotrindade",
   "license": "MIT",
   "dependencies": {
+    "alchemy-sdk": "^2.6.1",
+    "dotenv": "^16.0.3",
     "ethers": "^6.2.0"
   },
   "devDependencies": {
