@@ -1,39 +1,23 @@
 #!/usr/bin/env ts-node
+/* eslint-disable import/first */
+require('dotenv').config();
 
-const { initWasm, TW, KeyStore } = require("@trustwallet/wallet-core");
+const { Network, Alchemy, Utils } = require("alchemy-sdk");
 
-async function main() {
-  const start = new Date().getTime();
-  console.log(`Initializing Wasm...`);
-  const core = await initWasm();
-  const { CoinType, HexCoding, HDWallet, AnyAddress } = core;
-  console.log(`Done in ${new Date().getTime() - start} ms`);
+const settings = {
+    apiKey: process.env.ALCHEMY_KEY,
+    network: Network.ETH_GOERLI,
+};
 
-  const wallet = HDWallet.create(256, "");
-  const mnemonic = wallet.mnemonic();
-  const key = wallet.getKeyForCoin(CoinType.ethereum);
-  const pubKey = key.getPublicKeySecp256k1(false);
-  const address = AnyAddress.createWithPublicKey(pubKey, CoinType.ethereum);
-  const storage = new KeyStore.FileSystemStorage("/tmp");
-  const keystore = new KeyStore.Default(core, storage);
+const alchemy = new Alchemy(settings);
 
-  const storedWallet = await keystore.import(mnemonic, "Coolw", "password", [
-    CoinType.ethereum,
-  ]);
+const getBalance = async () => { 
+  try {
+  const balance = await alchemy.core.getBalance("0xAA65C14ADDDc3B408a41d76E6E24365Fa32DE6e8", 'latest')
+  console.log(`Balance is ${Utils.formatEther(balance)}: ETH`);
+  } catch(err) {
+    console.log(err);
+  }
+}  
 
-  console.log(`Create wallet: ${mnemonic}`);
-  console.log(`Get Ethereum public key: ${HexCoding.encode(pubKey.data())}`);
-  console.log(`Get Ethereum address: ${address.description()}`);
-  console.log(`CoinType.ethereum.value = ${CoinType.ethereum.value}`);
-  console.log("Ethereum protobuf models: \n", TW.Ethereum);
-  console.log("Keystore JSON: \n", JSON.stringify(storedWallet, null, 2));
-
-  await keystore.delete(storedWallet.id, "password");
-
-  wallet.delete();
-  key.delete();
-  pubKey.delete();
-  address.delete();
-}
-
-main();
+getBalance() 
